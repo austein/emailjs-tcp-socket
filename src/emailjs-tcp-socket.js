@@ -285,8 +285,7 @@
 
     function nodeShim() {
         TCPSocket = function(config) {
-            var self = this,
-                netApi;
+            var self = this;
 
             config.options.useSecureTransport = (typeof config.options.useSecureTransport !== 'undefined') ? config.options.useSecureTransport : false;
             config.options.binaryType = config.options.binaryType || 'arraybuffer';
@@ -303,8 +302,10 @@
                 throw new Error('Only arraybuffers are supported!');
             }
 
-            netApi = (self.ssl) ? tls : net;
-            self._socket = netApi.connect(self.port, self.host, self._emit.bind(self, 'open'));
+	    if(self.ssl)
+                self._socket = tls.connect(self.port, self.host, config.options.socketOptions || {}, self._emit.bind(self, 'open'));
+            else
+                self._socket = net.connect(self.port, self.host, self._emit.bind(self, 'open'));
 
             // add all event listeners to the new socket
             self._attachListeners();
